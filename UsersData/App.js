@@ -8,6 +8,7 @@ import {
   Switch,
   ScrollView,
   Image,
+  Button,
 } from "react-native";
 
 const themes = {
@@ -28,6 +29,7 @@ const apiUrl = "https://randomuser.me/api/?results=15";
 
 export default function App() {
   const [list, setList] = useState([]);
+  const [filterUsers, setFilterUsers] = useState([]);
 
   const [isEnabled, setIsEnabled] = useState(false);
   const [theme, setTheme] = useState(themes.light);
@@ -36,6 +38,7 @@ export default function App() {
     const res = await fetch(apiUrl);
     const randomUser = await res.json();
     setList(randomUser.results);
+    setFilterUsers(randomUser.results);
   };
 
   const switchToggle = () => {
@@ -43,12 +46,30 @@ export default function App() {
     setTheme(isEnabled ? themes.light : themes.dark);
   };
 
+  const handleFilter = (gender) => {
+    let filterResult = [];
+
+    if (gender === "male") {
+      filterResult = list.filter(function (user) {
+        return user.gender == "male";
+      });
+    } else if (gender === "female") {
+      filterResult = list.filter(function (user) {
+        return user.gender == "female";
+      });
+    } else {
+      filterResult = list;
+    }
+
+    setFilterUsers(filterResult);
+  };
+
   useEffect(() => {
     getUser();
   }, []);
 
   return (
-    <UserContext.Provider value={list}>
+    <UserContext.Provider value={filterUsers}>
       <ThemeContext.Provider value={theme}>
         <View style={styles.container}>
           <SafeAreaView>
@@ -61,6 +82,50 @@ export default function App() {
                 onValueChange={switchToggle}
                 value={isEnabled}
               />
+            </View>
+            <View style={styles.genderButtons}>
+              <View
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: theme.background,
+                  },
+                ]}
+              >
+                <Button
+                  title="all"
+                  color={theme.foreground}
+                  onPress={() => handleFilter("all")}
+                />
+              </View>
+              <View
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: theme.background,
+                  },
+                ]}
+              >
+                <Button
+                  title="Male"
+                  color={theme.foreground}
+                  onPress={() => handleFilter("male")}
+                />
+              </View>
+              <View
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: theme.background,
+                  },
+                ]}
+              >
+                <Button
+                  title="Female"
+                  color={theme.foreground}
+                  onPress={() => handleFilter("female")}
+                />
+              </View>
             </View>
             <ListUsers />
             <StatusBar style={"auto"} />
@@ -167,6 +232,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   email: {
-    color: "navy",
+    color: "#007AFF",
+  },
+  genderButtons: {
+    margin: 10,
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  button: {
+    backgroundColor: "#eeeeee",
+    paddingHorizontal: 8,
+    width: 100,
+    borderRadius: 8,
+    fontSize: 14,
   },
 });
